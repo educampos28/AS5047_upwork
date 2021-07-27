@@ -81,17 +81,16 @@ static void MX_SPI1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  uint16_t spi_buf_send; 		//store the message the to be sent though SPI
+  uint16_t spi_buf_receive;   //store the message the to be received though SPI
+  char uart_buf[50];		//store the message the to be sent though UART
+  uint16_t uart_buf_len;
 
-	uint16_t spi_buf_send; 		//store the message the to be sent though SPI
-	uint16_t spi_buf_receive;   //store the message the to be received though SPI
-	char uart_buf[50];		//store the message the to be sent though UART
-	uint16_t uart_buf_len;
+  uint16_t CMD_R_ANGLECOM = (PARITY_ODD  | OP_READ | ADDR_ANGLECOM);
+  uint16_t CMD_R_NOP      = (PARITY_ODD  | OP_READ | ADDR_NOP);
+  uint16_t CMD_R_ERRFL    = (PARITY_EVEN | OP_READ | ADDR_ERRFL);
 
-	uint16_t CMD_R_ANGLECOM = (PARITY_ODD  | OP_READ | ADDR_ANGLECOM);
-	uint16_t CMD_R_NOP      = (PARITY_ODD  | OP_READ | ADDR_NOP);
-	uint16_t CMD_R_ERRFL    = (PARITY_EVEN | OP_READ | ADDR_ERRFL);
-
-	float angle;
+  float angle;
 
   /* USER CODE END 1 */
 
@@ -114,6 +113,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  AS5047_CS_HIGH;
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
