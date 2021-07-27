@@ -19,10 +19,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stdio.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,6 +90,8 @@ int main(void)
   uint16_t CMD_R_NOP      = (PARITY_ODD  | OP_READ | ADDR_NOP);
   uint16_t CMD_R_ERRFL    = (PARITY_EVEN | OP_READ | ADDR_ERRFL);
 
+  HAL_StatusTypeDef status;
+
   float angle;
 
   /* USER CODE END 1 */
@@ -113,9 +115,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  AS5047_CS_HIGH;
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+
+  AS5047_CS_HIGH;
 
   //This section was translated from the original Arduino code. However, this section doesn't work because
   //0x0001 the the error register and it is only read
@@ -134,20 +137,29 @@ int main(void)
 //  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
 //  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
+
   spi_buf_send = CMD_R_ERRFL;
+  spi_buf_receive=0;
   AS5047_CS_LOW;
-  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
+  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 1, 100);
   AS5047_CS_HIGH;
   //The received message is trash
 //  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
 //  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
   spi_buf_send = CMD_R_NOP;
+  spi_buf_receive=0;
   AS5047_CS_LOW;
-  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
+  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 1, 100);
   AS5047_CS_HIGH;
   uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
   HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+
+  if(spi_buf_receive != 0){
+	  uart_buf_len = sprintf(uart_buf, "Error %d Detected\r\n", spi_buf_receive); //print data
+	  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+  }
+
 
   /* USER CODE END 2 */
 
@@ -161,23 +173,28 @@ int main(void)
 
 	  //send the address of the angle register
 	  AS5047_CS_LOW;
-	  HAL_SPI_Transmit(&hspi1, (uint8_t*)&CMD_R_ANGLECOM, 2, 100);
+	  HAL_SPI_Transmit(&hspi1, (uint8_t*)&CMD_R_ANGLECOM, 1, 100);
 	  AS5047_CS_HIGH;
 
 	  //send NOP and read the angle
 	  AS5047_CS_LOW;
-	  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&CMD_R_NOP, (uint8_t*)&spi_buf_receive, 2, 100);
+	  spi_buf_receive=0;
+	  status = HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&CMD_R_NOP, (uint8_t*)&spi_buf_receive, 1, 100);
 	  AS5047_CS_HIGH
 
-	  //removing the status bits
-	  spi_buf_receive &= 0x3FFF;
+	  if(((spi_buf_receive &0x4000)==0) && (status==HAL_OK)){
+		  //removing the status bits
+		  spi_buf_receive &= 0x3FFF;
 
-	  uart_buf_len = sprintf(uart_buf, "Raw value = %d\r\n", spi_buf_receive); //print raw data
-	  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+		  uart_buf_len = sprintf(uart_buf, "Raw value = %d\r\n", spi_buf_receive); //print raw data
+		  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
-	  angle = ((float)spi_buf_receive/16384.0 ) *360.0;
-	  uart_buf_len = sprintf(uart_buf, "The angle is = %0.2f\r\n",angle); //print the angle
-	  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+		  angle = ((float)spi_buf_receive/16384.0 ) *360.0;
+		  uart_buf_len = sprintf(uart_buf, "The angle is = %0.2f\r\n",angle); //print the angle
+		  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+		  }
+
+	  HAL_Delay(100);
 
 
   }
@@ -248,9 +265,9 @@ static void MX_SPI1_Init(void)
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
