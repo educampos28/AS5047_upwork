@@ -115,26 +115,30 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  spi_buf_send = 0x0001;
-  AS5047_CS_LOW;
-  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
-  AS5047_CS_HIGH;
-  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
-  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+  //This section was translated from the original Arduino code. However, this section doesn't work because
+  //0x0001 the the error register and it is only read
 
-  spi_buf_send = 0x0007;
-  AS5047_CS_LOW;
-  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
-  AS5047_CS_HIGH;
-  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
-  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+//  spi_buf_send = 0x0001; //writing command on the error register
+//  AS5047_CS_LOW;
+//  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
+//  AS5047_CS_HIGH;
+//  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
+//  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+//
+//  spi_buf_send = 0x0007; //this is the value written on the error register
+//  AS5047_CS_LOW;
+//  HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
+//  AS5047_CS_HIGH;
+//  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
+//  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
   spi_buf_send = CMD_R_ERRFL;
   AS5047_CS_LOW;
   HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)&spi_buf_send, (uint8_t*)&spi_buf_receive, 2, 100);
   AS5047_CS_HIGH;
-  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
-  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
+  //The received message is trash
+//  uart_buf_len = sprintf(uart_buf, "%d\r\n", spi_buf_receive); //print data
+//  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
   spi_buf_send = CMD_R_NOP;
   AS5047_CS_LOW;
