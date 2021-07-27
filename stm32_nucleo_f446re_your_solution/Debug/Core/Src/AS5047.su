@@ -1,0 +1,4 @@
+AS5047.cpp:10:1:AS5047::AS5047()	16	static
+AS5047.cpp:15:1:AS5047::~AS5047()	16	static
+AS5047.cpp:15:1:virtual AS5047::~AS5047()	16	static
+AS5047.cpp:23:9:uint8_t AS5047::isEven(uint16_t)	32	static
