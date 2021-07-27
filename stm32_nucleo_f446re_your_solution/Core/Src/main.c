@@ -91,6 +91,8 @@ int main(void)
 	uint16_t CMD_R_NOP      = (PARITY_ODD  | OP_READ | ADDR_NOP);
 	uint16_t CMD_R_ERRFL    = (PARITY_EVEN | OP_READ | ADDR_ERRFL);
 
+	float angle;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -173,7 +175,7 @@ int main(void)
 	  uart_buf_len = sprintf(uart_buf, "Raw value = %d\r\n", spi_buf_receive); //print raw data
 	  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
-	  float angle = ((float)spi_buf_receive/16384.0 ) *360.0;
+	  angle = ((float)spi_buf_receive/16384.0 ) *360.0;
 	  uart_buf_len = sprintf(uart_buf, "The angle is = %0.2f\r\n",angle); //print the angle
 	  HAL_UART_Transmit(&huart2, (uint8_t*)uart_buf, uart_buf_len, 100);
 
