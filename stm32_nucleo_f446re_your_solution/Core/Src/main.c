@@ -37,12 +37,12 @@
 #define AS5047_CS_HIGH	HAL_GPIO_WritePin(GPIOB, AS5047_CS_Pin, GPIO_PIN_SET);
 
 
-uint16_t OP_READ =  0x4000;
-uint16_t PARITY_EVEN =0x0000;
-uint16_t PARITY_ODD = 0x8000;
-uint16_t ADDR_NOP= 0x0000;
-uint16_t ADDR_ERRFL =0x0001;
-uint16_t ADDR_ANGLECOM  =   0x3FFF;
+#define OP_READ   	      0x4000
+#define PARITY_EVEN       0x0000
+#define PARITY_ODD        0x8000
+#define ADDR_NOP  	      0x0000
+#define ADDR_ERRFL 	      0x0001
+#define ADDR_ANGLECOM     0x3FFF
 
 /* USER CODE END PD */
 
